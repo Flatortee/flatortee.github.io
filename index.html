@@ -1,11 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Catalogue des packages Prism Engine : documentation, code source, recherche et filtrage par tags." />
     <title>Prism Engine Packages</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    
+    <header class="app-header" role="banner">
+        <h1 class="app-title">Prism Engine Packages</h1>
+        <div class="header-center">
+            <label class="search-wrapper" aria-label="Recherche de packages">
+                <span class="visually-hidden" id="search-label">Rechercher</span>
+                <input id="search" type="search" placeholder="Rechercher un package… (Ctrl+/)" aria-labelledby="search-label" autocomplete="off" />
+                <button class="clear-search" id="clearSearch" aria-label="Effacer la recherche">✕</button>
+            </label>
+            <div class="tag-summary" id="tagSummary" aria-live="polite"></div>
+        </div>
+        <nav class="header-actions" aria-label="Liens généraux">
+            <a class="round-btn" href="docs/" id="docBtn" title="Documentation générale" aria-label="Documentation générale">doc</a>
+            <a class="round-btn" href="https://github.com/Flatortee" target="_blank" rel="noopener" title="Organisation GitHub" aria-label="Organisation GitHub">Git</a>
+        </nav>
+    </header>
+
+    <main class="app-main" id="main" tabindex="-1">
+        <section class="tag-section" aria-labelledby="tagsTitle">
+            <div class="tag-section-head">
+                <h2 id="tagsTitle">Catégories / Tags</h2>
+                <div class="tag-helpers">
+                    <button id="selectAllTags" class="mini-btn" type="button">Tout</button>
+                    <button id="clearTags" class="mini-btn" type="button">Aucun</button>
+                </div>
+            </div>
+            <div id="tags" class="tags" role="list" aria-label="Filtrer par tags"></div>
+        </section>
+
+        <section class="grid-section" aria-labelledby="packagesTitle">
+            <h2 id="packagesTitle" class="visually-hidden">Packages</h2>
+            <div id="grid" class="package-grid" role="list" aria-live="polite" aria-busy="false"></div>
+            <p id="emptyState" class="empty-state" hidden>Aucun résultat pour ces filtres…</p>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <small>&copy; <span id="year"></span> Prism Engine — <a href="LICENSE">Licence</a></small>
+        <button id="toggleTheme" class="mini-btn" type="button" aria-pressed="false">Mode sombre</button>
+    </footer>
+
+    <script src="app.js" type="module"></script>
 </body>
 </html>
