@@ -197,11 +197,79 @@ function initInventoryDemo(){
   render();
 }
 
+// SOURCES: load .hpp / .cpp from packages_pages/files/<folder>/
+async function initSources(){
+  // Each page should set data-files attribute on a container .sources with package name
+  const sourcesContainers = document.querySelectorAll('.sources[data-package]');
+  for (const container of sourcesContainers) {
+    const pkg = container.dataset.package;
+    const folder = `packages_pages/files/${pkg}`;
+    // create two source blocks: header (.hpp) and impl (.cpp)
+    const hppName = `${pkg}.hpp`;
+    const cppName = `${pkg}.cpp`;
+    container.innerHTML = `
+      <div class="source-block">
+        <div class="source-header">
+          <strong>.hpp — ${hppName}</strong>
+          <div class="source-actions">
+            <a class="source-download" download href="${folder}/${hppName}">Download .h</a>
+            <button class="source-toggle" data-target="hpp" aria-expanded="false">Show</button>
+          </div>
+        </div>
+        <div class="source-content" data-name="${hppName}"><div class="source-empty">Chargement…</div></div>
+      </div>
+      <div class="source-block">
+        <div class="source-header">
+          <strong>.cpp — ${cppName}</strong>
+          <div class="source-actions">
+            <a class="source-download" download href="${folder}/${cppName}">Download .cpp</a>
+            <button class="source-toggle" data-target="cpp" aria-expanded="false">Show</button>
+          </div>
+        </div>
+        <div class="source-content" data-name="${cppName}"><div class="source-empty">Chargement…</div></div>
+      </div>`;
+
+    // Wire toggles
+    container.querySelectorAll('.source-toggle').forEach(btn=>{
+      btn.addEventListener('click', async (e)=>{
+        const target = btn.dataset.target;
+        const content = container.querySelector(`.source-content[data-name="${pkg}.${target}"]`) || container.querySelector(`.source-content[data-name="${pkg}.${target}"]`);
+        // compute filename
+        const filename = target === 'hpp' ? `${pkg}.hpp` : `${pkg}.cpp`;
+        const contentEl = container.querySelector(`.source-content[data-name="${filename}"]`);
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        if (expanded) {
+          btn.setAttribute('aria-expanded','false');
+          contentEl.style.display = 'none';
+          return;
+        }
+        btn.setAttribute('aria-expanded','true');
+        // load file text: try local path first, then raw.githubusercontent fallback
+        const localUrl = `${location.origin}/${folder}/${filename}`;
+        const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${folder}/${filename}`;
+        try {
+          let res = await fetch(localUrl);
+          if (!res.ok) res = await fetch(rawUrl);
+          if (!res.ok) throw new Error('HTTP '+res.status);
+          const text = await res.text();
+          contentEl.innerHTML = `<pre><code>${escapeHtml(text)}</code></pre>`;
+        } catch (err) {
+          contentEl.innerHTML = `<div class="source-empty">Impossible de charger ${filename} — placez-le dans ${folder} ou vérifiez le chemin.</div>`;
+        }
+        contentEl.style.display = 'block';
+      });
+    });
+  }
+}
+
+function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
 function init(){
   applyTheme();
   initYear();
   initCarousels();
   initInventoryDemo();
+  initSources();
   const toggleThemeBtn = document.getElementById('toggleTheme');
   if (toggleThemeBtn) toggleThemeBtn.addEventListener('click', toggleTheme);
 }

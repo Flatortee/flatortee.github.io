@@ -48,3 +48,16 @@
   .demo-list button { background:none; border:none; color: var(--danger); font-weight:600; cursor:pointer; }
   .demo-list button:hover { text-decoration:underline; }
 }
+
+/* Sources viewer */
+.sources { display:flex; flex-direction:column; gap:.8rem; }
+.source-block { border:1px dashed var(--border); background: linear-gradient(180deg,var(--bg),var(--bg-accent)); padding:.6rem; border-radius:6px; }
+.source-header { display:flex; justify-content:space-between; align-items:center; gap:.6rem; }
+.source-toggle { background:none; border:1px solid var(--border); color:var(--text); padding:.45rem .65rem; border-radius:6px; cursor:pointer; font-weight:600; }
+.source-toggle[aria-expanded="true"] { background:var(--bg-accent); border-color:var(--primary); color: var(--text); box-shadow: var(--focus-ring); }
+.source-actions { display:flex; gap:.5rem; align-items:center; }
+.source-download { text-decoration:none; font-size:.82rem; padding:.35rem .55rem; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); }
+.source-download:hover { background:var(--bg-accent); }
+.source-content { margin-top:.6rem; display:none; }
+.source-content pre { margin:0; padding:.9rem; background:var(--bg); border:1px solid var(--border); border-radius:6px; overflow:auto; font-size:.78rem; line-height:1.35; }
+.source-empty { font-size:.85rem; color:var(--text-soft); padding:.6rem; }
