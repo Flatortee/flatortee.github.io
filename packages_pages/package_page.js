@@ -22,9 +22,81 @@ function initYear(){
 }
 
 // CARROUSEL
-function initCarousels(){
+async function initCarousels(){
   const carousels = document.querySelectorAll('.carousel');
-  carousels.forEach(setupCarousel);
+  for (const c of carousels) {
+    const folder = c.dataset.gallery;
+    if (folder) {
+      await buildDynamicGallery(c, folder).catch(err=>{
+        console.warn('Galerie dynamique échouée', folder, err);
+      });
+    }
+    setupCarousel(c);
+  }
+}
+
+const REPO_OWNER = 'Flatortee';
+const REPO_NAME = 'flatortee.github.io';
+const IMG_BASE = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/packages_pages/images`;
+
+async function buildDynamicGallery(root, folder){
+  // Si le HTML contient déjà des slides, ne pas dupliquer
+  if (root.querySelector('.carousel-track .slide')) return;
+  const track = ensureTrackStructure(root);
+  // 1) Essayer via API GitHub (liste du dossier)
+  const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/packages_pages/images/${folder}`;
+  let files = [];
+  try {
+    const res = await fetch(apiUrl);
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    const json = await res.json();
+    files = (Array.isArray(json)?json:[]).filter(f=>f.type==='file');
+  } catch (e) {
+    // Fallback: manifeste json optionnel (non encore créé) ou stop
+    console.warn('API GitHub indispo, fallback simple', e);
+  }
+  // Extensions d'image autorisées
+  const exts = ['.png','.jpg','.jpeg','.webp','.gif','.avif'];
+  const images = files.filter(f=> exts.some(ext=>f.name.toLowerCase().endsWith(ext)) );
+  if (!images.length) {
+    root.innerHTML = '<p style="margin:0;padding:1rem;font-size:.75rem;">Aucune image trouvée dans packages_pages/images/'+folder+'</p>';
+    return;
+  }
+  // Tri alphabétique
+  images.sort((a,b)=> a.name.localeCompare(b.name));
+  const frag = document.createDocumentFragment();
+  images.forEach(file=>{
+    const fName = file.name;
+    const baseCaption = fName.replace(/[-_]/g,' ').replace(/\.[^.]+$/,'');
+    const fig = document.createElement('figure');
+    fig.className='slide';
+    const img = document.createElement('img');
+    img.loading='lazy';
+    img.alt = baseCaption;
+    img.src = file.download_url || `${IMG_BASE}/${folder}/${fName}`;
+    const cap = document.createElement('figcaption');
+    cap.textContent = baseCaption;
+    fig.appendChild(img); fig.appendChild(cap); frag.appendChild(fig);
+  });
+  track.appendChild(frag);
+}
+
+function ensureTrackStructure(root){
+  let track = root.querySelector('.carousel-track');
+  if (!track) {
+    track = document.createElement('div'); track.className='carousel-track'; root.appendChild(track);
+  }
+  // Ajouter boutons/dots si absents
+  if (!root.querySelector('.carousel-btn.prev')) {
+    const prev = document.createElement('button'); prev.className='carousel-btn prev'; prev.type='button'; prev.setAttribute('aria-label','Précédent'); prev.textContent='‹'; root.appendChild(prev);
+  }
+  if (!root.querySelector('.carousel-btn.next')) {
+    const next = document.createElement('button'); next.className='carousel-btn next'; next.type='button'; next.setAttribute('aria-label','Suivant'); next.textContent='›'; root.appendChild(next);
+  }
+  if (!root.querySelector('.carousel-dots')) {
+    const dots = document.createElement('div'); dots.className='carousel-dots'; root.appendChild(dots);
+  }
+  return track;
 }
 
 function setupCarousel(root){
