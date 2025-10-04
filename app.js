@@ -10,7 +10,8 @@ const PACKAGES = [
     version: '1.0.0',
     tags: ['noyau', 'moteur', 'runtime'],
     license: 'MIT',
-    repo: 'https://github.com/Flatortee/prism-core'
+    repo: 'https://github.com/Flatortee/prism-core',
+    page: 'packages_pages/core.html'
   },
   {
     id: 'render-gl',
@@ -19,7 +20,8 @@ const PACKAGES = [
     version: '0.7.2',
     tags: ['render', 'webgl', 'gpu'],
     license: 'MIT',
-    repo: 'https://github.com/Flatortee/prism-render-gl'
+    repo: 'https://github.com/Flatortee/prism-render-gl',
+    page: 'packages_pages/render_gl.html'
   },
   {
     id: 'ui',
@@ -28,7 +30,8 @@ const PACKAGES = [
     version: '0.3.1',
     tags: ['ui', 'widgets'],
     license: 'MIT',
-    repo: 'https://github.com/Flatortee/prism-ui'
+    repo: 'https://github.com/Flatortee/prism-ui',
+    page: 'packages_pages/ui.html'
   },
   {
     id: 'physics',
@@ -37,7 +40,8 @@ const PACKAGES = [
     version: '0.1.0',
     tags: ['physique', 'simulation'],
     license: 'MIT',
-    repo: 'https://github.com/Flatortee/prism-physics'
+    repo: 'https://github.com/Flatortee/prism-physics',
+    page: 'packages_pages/physics.html'
   },
   {
     id: 'assets',
@@ -46,7 +50,8 @@ const PACKAGES = [
     version: '0.4.5',
     tags: ['assets', 'io'],
     license: 'MIT',
-    repo: 'https://github.com/Flatortee/prism-assets'
+    repo: 'https://github.com/Flatortee/prism-assets',
+    page: 'packages_pages/assets.html'
   },
   {
     id: 'math',
@@ -55,7 +60,8 @@ const PACKAGES = [
     version: '1.1.0',
     tags: ['math', 'noyau'],
     license: 'MIT',
-    repo: 'https://github.com/Flatortee/prism-math'
+    repo: 'https://github.com/Flatortee/prism-math',
+    page: 'packages_pages/math.html'
   },
   {
     id: 'net',
@@ -64,7 +70,8 @@ const PACKAGES = [
     version: '0.0.8',
     tags: ['reseau', 'multijoueur', 'experimental'],
     license: 'MIT',
-    repo: 'https://github.com/Flatortee/prism-net'
+    repo: 'https://github.com/Flatortee/prism-net',
+    page: 'packages_pages/net.html'
   },
   {
     id: 'ai',
@@ -73,7 +80,19 @@ const PACKAGES = [
     version: '0.2.0',
     tags: ['ia', 'pathfinding'],
     license: 'MIT',
-    repo: 'https://github.com/Flatortee/prism-ai'
+    repo: 'https://github.com/Flatortee/prism-ai',
+    page: 'packages_pages/ai.html'
+  },
+  // Nouveau package Inventory System lié à la page existante
+  {
+    id: 'inventory-system',
+    name: 'prism-inventory-system',
+    description: 'Système d\'inventaire modulaire (stack, slots, persistance).',
+    version: '0.1.0',
+    tags: ['ui', 'assets'],
+    license: 'MIT',
+    repo: 'https://github.com/Flatortee/prism-inventory-system',
+    page: 'packages_pages/inventory_system.html'
   }
 ];
 
@@ -203,7 +222,7 @@ function renderGrid() {
       </div>
       <div class="package-footer">
         <span class="badge" title="Version">v${p.version}</span>
-        <a class="more" href="${p.repo}" target="_blank" rel="noopener">Code →</a>
+        <a class="more" href="${p.page || p.repo}" ${p.page ? '' : 'target="_blank" rel="noopener"'}>Show →</a>
       </div>`;
     frag.appendChild(card);
   });

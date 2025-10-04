@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Prism Inventory System • Package</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+	<link rel="stylesheet" href="../styles.css" />
+	<link rel="stylesheet" href="package_page.css" />
+</head>
+<body class="package-page">
+	<header class="app-header" role="banner">
+		<a class="mini-btn" href="../index.html" aria-label="Retour au catalogue">← Retour</a>
+		<h1 class="app-title" style="font-size:1.35rem;">prism-inventory-system</h1>
+		<nav class="header-actions">
+			<a class="round-btn" href="https://github.com/Flatortee/prism-inventory-system" target="_blank" rel="noopener">Git</a>
+		</nav>
+	</header>
+	<main class="pkg-main">
+		<article class="pkg-hero">
+			<div class="hero-head">
+				<h2>Système d'inventaire modulaire</h2>
+				<span class="badge">v0.1.0</span>
+			</div>
+			<p class="lead">Gestion des items, slots, piles (stack), catégories, persistance et événements pour jeux construits avec Prism Engine.</p>
+			<div class="quick-meta">
+				<span class="badge" data-tag="ui">ui</span>
+				<span class="badge" data-tag="assets">assets</span>
+				<span class="badge" title="Licence">MIT</span>
+			</div>
+			<div class="hero-actions">
+				<a href="#installation" class="mini-btn">Installation</a>
+				<a href="#api" class="mini-btn">API</a>
+				<button id="toggleTheme" class="mini-btn" type="button">Mode sombre</button>
+			</div>
+		</article>
+
+			<section id="installation" class="pkg-section">
+			<h3>Installation</h3>
+			<pre class="code"><code>npm install prism-inventory-system</code></pre>
+			<pre class="code"><code>import { Inventory, Slot } from 'prism-inventory-system';
+
+const inv = new Inventory({ size: 32, stackLimit: 99 });
+inv.on('add', e => console.log('Item ajouté', e));
+</code></pre>
+		</section>
+
+			<section id="galerie" class="pkg-section">
+				<h3>Galerie</h3>
+				<!-- Carrousel dynamique: images du dossier images/inventory_system -->
+				<div class="carousel" data-autoplay="6000" data-gallery="inventory_system" aria-label="Galerie d'images - Inventory System"></div>
+			</section>
+
+		<section id="concepts" class="pkg-section">
+			<h3>Concepts clés</h3>
+			<ul class="concepts">
+				<li><strong>Inventory</strong> : conteneur principal avec events.</li>
+				<li><strong>Slot</strong> : position pouvant contenir zéro ou un stack.</li>
+				<li><strong>Stack</strong> : item + quantité (merge auto selon règles).</li>
+				<li><strong>Rules</strong> : validation type, catégorie, poids.</li>
+				<li><strong>Persistance</strong> : sérialisation JSON rapide.</li>
+			</ul>
+		</section>
+
+		<section id="api" class="pkg-section">
+			<h3>API rapide</h3>
+			<table class="api-table">
+				<thead><tr><th>Méthode</th><th>Description</th></tr></thead>
+				<tbody>
+					<tr><td>add(item, qty)</td><td>Ajoute un item (fusionne si possible).</td></tr>
+					<tr><td>remove(itemId, qty)</td><td>Retire quantité spécifiée.</td></tr>
+					<tr><td>find(predicate)</td><td>Recherche d'items.</td></tr>
+					<tr><td>serialize()</td><td>Retourne état JSON compact.</td></tr>
+					<tr><td>load(json)</td><td>Recharge un état sérialisé.</td></tr>
+					<tr><td>on(event, cb)</td><td>Écoute (add, remove, move, change).</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section id="demo" class="pkg-section">
+			<h3>Mini démo</h3>
+			<div class="demo">
+				<form id="demoForm" autocomplete="off">
+					<input name="name" required placeholder="Nom item" />
+					<input name="qty" type="number" min="1" value="1" />
+					<button class="mini-btn" type="submit">Add</button>
+				</form>
+				<ul id="demoList" class="demo-list"></ul>
+			</div>
+		</section>
+	</main>
+		<footer class="app-footer"><small>&copy; <span id="year"></span> Prism Engine</small></footer>
+		<script type="module" src="package_page.js"></script>
+</body>
+</html>
