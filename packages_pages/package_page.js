@@ -212,7 +212,7 @@ async function initSources(){
         <div class="source-header">
           <strong>.hpp — ${hppName}</strong>
           <div class="source-actions">
-            <a class="source-download" download href="${folder}/${hppName}">Download .h</a>
+            <a class="source-download" download href="/${folder}/${hppName}">Download .h</a>
             <button class="source-toggle" data-target="hpp" aria-expanded="false">Show</button>
           </div>
         </div>
@@ -222,7 +222,7 @@ async function initSources(){
         <div class="source-header">
           <strong>.cpp — ${cppName}</strong>
           <div class="source-actions">
-            <a class="source-download" download href="${folder}/${cppName}">Download .cpp</a>
+            <a class="source-download" download href="/${folder}/${cppName}">Download .cpp</a>
             <button class="source-toggle" data-target="cpp" aria-expanded="false">Show</button>
           </div>
         </div>
