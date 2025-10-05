@@ -37,64 +37,36 @@
 			</div>
 		</article>
 
-			<section id="installation" class="pkg-section">
-			<h3>Installation</h3>
-			<pre class="code"><code>npm install prism-inventory-system</code></pre>
-			<pre class="code"><code>import { Inventory, Slot } from 'prism-inventory-system';
-
-const inv = new Inventory({ size: 32, stackLimit: 99 });
-inv.on('add', e => console.log('Item ajouté', e));
 </code></pre>
 		</section>
 
 			<section id="galerie" class="pkg-section">
 				<h3>Galerie</h3>
 				<!-- Carrousel dynamique: images du dossier images/inventory_system -->
-				<div class="carousel" data-autoplay="6000" data-gallery="inventory_system" aria-label="Galerie d'images - Inventory System"></div>
+				<div class="package-detail">
+					<div class="package-media" data-gallery="inventory_system">
+						<div class="main-image" aria-live="polite"></div>
+						<div class="thumbs" role="list" aria-label="Vignettes"></div>
+					</div>
+					<aside class="package-meta-right">
+						<div class="author">
+							<img src="https://placehold.co/64x64/94a3b8/fff?text=I" alt="Auteur">
+							<div><strong>Flatortee</strong><div class="meta-row"><small>Publié: 2024-08-10</small></div></div>
+						</div>
+						<div>
+							<h4>Tags</h4>
+							<div class="tags-list"><span class="badge" data-tag="ui">ui</span><span class="badge" data-tag="inventory">inventory</span></div>
+						</div>
+						<div>
+							<a class="download-big" href="/packages_pages/files/inventory_system/inventory_system.hpp" download>.hpp</a>
+							<a class="download-big" href="/packages_pages/files/inventory_system/inventory_system.cpp" download style="margin-top:.6rem;">.cpp</a>
+						</div>
+					</aside>
+				</div>
 			</section>
 
-		<section id="concepts" class="pkg-section">
-			<h3>Concepts clés</h3>
-			<ul class="concepts">
-				<li><strong>Inventory</strong> : conteneur principal avec events.</li>
-				<li><strong>Slot</strong> : position pouvant contenir zéro ou un stack.</li>
-				<li><strong>Stack</strong> : item + quantité (merge auto selon règles).</li>
-				<li><strong>Rules</strong> : validation type, catégorie, poids.</li>
-				<li><strong>Persistance</strong> : sérialisation JSON rapide.</li>
-			</ul>
-		</section>
+			<!-- Mini Documentation : -->
 
-		<section id="api" class="pkg-section">
-			<h3>API rapide</h3>
-			<table class="api-table">
-				<thead><tr><th>Méthode</th><th>Description</th></tr></thead>
-				<tbody>
-					<tr><td>add(item, qty)</td><td>Ajoute un item (fusionne si possible).</td></tr>
-					<tr><td>remove(itemId, qty)</td><td>Retire quantité spécifiée.</td></tr>
-					<tr><td>find(predicate)</td><td>Recherche d'items.</td></tr>
-					<tr><td>serialize()</td><td>Retourne état JSON compact.</td></tr>
-					<tr><td>load(json)</td><td>Recharge un état sérialisé.</td></tr>
-					<tr><td>on(event, cb)</td><td>Écoute (add, remove, move, change).</td></tr>
-				</tbody>
-			</table>
-		</section>
-
-		<section id="demo" class="pkg-section">
-			<h3>Mini démo</h3>
-			<div class="demo">
-				<form id="demoForm" autocomplete="off">
-					<input name="name" required placeholder="Nom item" />
-					<input name="qty" type="number" min="1" value="1" />
-					<button class="mini-btn" type="submit">Add</button>
-				</form>
-				<ul id="demoList" class="demo-list"></ul>
-			</div>
-		</section>
-
-		<section id="sources" class="pkg-section">
-			<h3>Sources (extraits)</h3>
-			<div class="sources" data-package="inventory_system"></div>
-		</section>
 	</main>
 		<footer class="app-footer"><small>&copy; <span id="year"></span> Prism Engine</small></footer>
 		<script type="module" src="package_page.js"></script>

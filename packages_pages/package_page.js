@@ -21,181 +21,265 @@ function initYear(){
   if (y) y.textContent = new Date().getFullYear();
 }
 
-// CARROUSEL
-async function initCarousels(){
-  const carousels = document.querySelectorAll('.carousel');
-  for (const c of carousels) {
-    const folder = c.dataset.gallery;
-    if (folder) {
-      await buildDynamicGallery(c, folder).catch(err=>{
-        console.warn('Galerie dynamique échouée', folder, err);
-      });
-    }
-    setupCarousel(c);
-  }
-}
-
+// GALLERY: main image + thumbnails selector
 const REPO_OWNER = 'Flatortee';
 const REPO_NAME = 'flatortee.github.io';
 const IMG_BASE = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/packages_pages/images`;
 
-async function buildDynamicGallery(root, folder){
-  // Si le HTML contient déjà des slides, ne pas dupliquer
-  if (root.querySelector('.carousel-track .slide')) return;
-  const track = ensureTrackStructure(root);
-  // 1) Essayer via API GitHub (liste du dossier)
+async function initGalleries(){
+  const galleries = document.querySelectorAll('[data-gallery]');
+  for (const g of galleries) {
+    const folder = g.dataset.gallery;
+    if (folder) {
+      await buildGallery(g, folder).catch(err=> console.warn('Galerie dynamique échouée', folder, err));
+    }
+    setupGallery(g);
+  }
+}
+
+async function buildGallery(root, folder){
+  // if thumbs already present assume static content exists
+  if (root.querySelector('.thumbs .thumb')) return;
+  // Try to read a local manifest first for deterministic ordering and exact file list
+  try {
+    const manifestUrl = `${location.origin}/packages_pages/images/${folder}/manifest.json`;
+    const mres = await fetch(manifestUrl);
+    if (mres.ok) {
+      const list = await mres.json();
+      if (Array.isArray(list) && list.length) {
+        const thumbs = root.querySelector('.thumbs') || (function(){ const d=document.createElement('div'); d.className='thumbs'; root.appendChild(d); return d; })();
+        list.forEach((name,i)=>{
+          const btn = document.createElement('button');
+          btn.type = 'button'; btn.className = 'thumb';
+          const imgEl = document.createElement('img');
+          imgEl.alt = `image-${i+1}`;
+          const localUrl = `${location.origin}/packages_pages/images/${folder}/${name}`;
+          const rawUrl = `${IMG_BASE}/${folder}/${name}`;
+          // use raw.githubusercontent as a reliable initial src so thumbnails don't appear broken.
+          // then probe the local path and swap to it if available (faster when served locally).
+          imgEl.src = rawUrl;
+          imgEl.dataset.raw = rawUrl;
+          imgEl.dataset.local = localUrl;
+          try {
+            const probe = new Image();
+            probe.onload = ()=>{ imgEl.src = localUrl; };
+            probe.onerror = ()=>{/* keep rawUrl */};
+            probe.src = localUrl;
+          } catch(e) { /* ignore probe errors */ }
+          // debug log and robust error handling: if both local and raw fail, hide the thumb
+          (function(btn, imgEl, localUrl, rawUrl, name){
+            let triedLocal = false;
+            let triedRaw = !!imgEl.src;
+            imgEl.addEventListener('error', function onErr(){
+              // try the other source once
+              if (!triedLocal && imgEl.src === rawUrl && localUrl){ triedLocal = true; imgEl.src = localUrl; return; }
+              if (!triedRaw && imgEl.src === localUrl && rawUrl){ triedRaw = true; imgEl.src = rawUrl; return; }
+              // final failure: hide and log
+              console.warn('Thumbnail failed to load for', name, { local: localUrl, raw: rawUrl });
+              btn.style.display = 'none';
+              imgEl.removeEventListener('error', onErr);
+            });
+          })(btn, imgEl, localUrl, rawUrl, name);
+          btn.appendChild(imgEl);
+          thumbs.appendChild(btn);
+        });
+        return;
+      }
+    }
+  } catch(err){ console.warn('No manifest or failed to read manifest', err); }
   const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/packages_pages/images/${folder}`;
   let files = [];
   try {
     const res = await fetch(apiUrl);
     if (!res.ok) throw new Error('HTTP '+res.status);
     const json = await res.json();
-    files = (Array.isArray(json)?json:[]).filter(f=>f.type==='file');
-  } catch (e) {
-    // Fallback: manifeste json optionnel (non encore créé) ou stop
-    console.warn('API GitHub indispo, fallback simple', e);
+    files = Array.isArray(json)?json.filter(f=>f.type==='file'):[];
+  } catch(e){ console.warn('GitHub API failed', e); }
+  // If contents API didn't return files, try git/trees to list repo tree (better for large folders)
+  if (!files.length) {
+    try {
+      const treeUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/trees/main?recursive=1`;
+      const r2 = await fetch(treeUrl);
+      if (r2.ok){
+        const j2 = await r2.json();
+        if (j2 && Array.isArray(j2.tree)){
+          files = j2.tree.filter(t=> t.path && t.type==='blob' && t.path.startsWith(`packages_pages/images/${folder}/`)).map(t=>({ name: t.path.split('/').pop(), download_url: `${IMG_BASE}/${folder}/${t.path.split('/').pop()}` }));
+        }
+      }
+    } catch(e) { console.warn('git/trees fallback failed', e); }
   }
-  // Extensions d'image autorisées
   const exts = ['.png','.jpg','.jpeg','.webp','.gif','.avif'];
   const images = files.filter(f=> exts.some(ext=>f.name.toLowerCase().endsWith(ext)) );
-  if (!images.length) {
-    root.innerHTML = '<p style="margin:0;padding:1rem;font-size:.75rem;">Aucune image trouvée dans packages_pages/images/'+folder+'</p>';
-    return;
+  let found = [];
+  if (images.length) {
+    images.sort((a,b)=> a.name.localeCompare(b.name));
+    found = images.map(f=> f.download_url || `${IMG_BASE}/${folder}/${f.name}`);
+  } else {
+    // fallback: try a set of common filename patterns in the folder
+    const base = `${location.origin}/packages_pages/images/${folder}`;
+    const patterns = [];
+    for (let i=1;i<=12;i++){ patterns.push(`p${i}.png`); patterns.push(`p${i}.jpg`); patterns.push(`img${i}.png`); patterns.push(`img${i}.jpg`); patterns.push(`${i}.png`); patterns.push(`${i}.jpg`); }
+    // Also try any files numbered with 01..12
+    for (let i=1;i<=12;i++){ const s = String(i).padStart(2,'0'); patterns.push(`${s}.png`); patterns.push(`${s}.jpg`); }
+    // probe these URLs with HEAD to see which exist (limited number)
+    const thumbs = root.querySelector('.thumbs') || (function(){ const d=document.createElement('div'); d.className='thumbs'; root.appendChild(d); return d; })();
+    for (const p of patterns){
+      const url = `${base}/${p}`;
+      try{
+        // try to fetch as GET but only small requests; rely on cache later
+        const r = await fetch(url, {method:'GET'});
+        if (r.ok){ found.push(url); }
+      }catch(e){}
+    }
+    // If still empty, try to fetch GitHub HTML tree page and parse filenames (last resort)
+    if (!found.length) {
+      try{
+        const treeHtmlUrl = `https://github.com/${REPO_OWNER}/${REPO_NAME}/tree/main/packages_pages/images/${folder}`;
+        const rh = await fetch(treeHtmlUrl);
+        if (rh.ok){
+          const text = await rh.text();
+          // find occurrences of blob paths
+          const re = new RegExp(`/`+REPO_OWNER+`/`+REPO_NAME+`/blob/main/packages_pages/images/${folder}/([\w%\-+.@()]+)`, 'g');
+          const names = new Set();
+          let m;
+          while((m = re.exec(text)) !== null){
+            names.add(decodeURIComponent(m[1]));
+          }
+          for(const n of names){
+            const ext = n.split('.').pop().toLowerCase();
+            if (['png','jpg','jpeg','webp','gif','avif'].includes(ext)) found.push(`${IMG_BASE}/${folder}/${n}`);
+          }
+        }
+      }catch(e){ console.warn('HTML tree parse fallback failed', e); }
+    }
+    // if still empty, do nothing (no images)
   }
-  // Tri alphabétique
-  images.sort((a,b)=> a.name.localeCompare(b.name));
-  const frag = document.createDocumentFragment();
-  images.forEach(file=>{
-    const fName = file.name;
-    const baseCaption = fName.replace(/[-_]/g,' ').replace(/\.[^.]+$/,'');
-    const fig = document.createElement('figure');
-    fig.className='slide';
-    const img = document.createElement('img');
-    img.loading='lazy';
-    img.alt = baseCaption;
-    img.src = file.download_url || `${IMG_BASE}/${folder}/${fName}`;
-    const cap = document.createElement('figcaption');
-    cap.textContent = baseCaption;
-    fig.appendChild(img); fig.appendChild(cap); frag.appendChild(fig);
+  if (!found.length) return;
+  const thumbs = root.querySelector('.thumbs') || (function(){ const d=document.createElement('div'); d.className='thumbs'; root.appendChild(d); return d; })();
+  // ensure uniqueness and order
+  const unique = Array.from(new Set(found));
+  unique.forEach((url,i)=>{
+    const btn = document.createElement('button'); btn.type='button'; btn.className='thumb';
+    const imgEl = document.createElement('img');
+    imgEl.alt = `image-${i+1}`;
+    imgEl.src = url;
+    // compute a local equivalent path when possible (may be identical)
+    const localEquivalent = url.startsWith(IMG_BASE) ? url.replace(IMG_BASE, `${location.origin}/packages_pages/images`) : url.replace(`${location.origin}/packages_pages/images`, IMG_BASE);
+    imgEl.dataset.raw = url;
+    imgEl.dataset.local = localEquivalent;
+    // add error handling: try the alternate then hide the thumb if both fail
+    (function(btn, imgEl, localEquivalent, url){
+      let triedLocal = false;
+      let triedRaw = true; // raw is initial
+      imgEl.addEventListener('error', function onErr(){
+        if (!triedLocal && imgEl.src === url && localEquivalent){ triedLocal = true; imgEl.src = localEquivalent; return; }
+        if (!triedRaw && imgEl.src === localEquivalent && url){ triedRaw = true; imgEl.src = url; return; }
+        console.warn('Thumbnail failed to load for', imgEl.alt, { local: localEquivalent, raw: url });
+        btn.style.display = 'none';
+        imgEl.removeEventListener('error', onErr);
+      });
+    })(btn, imgEl, localEquivalent, url);
+    btn.appendChild(imgEl);
+    thumbs.appendChild(btn);
   });
-  track.appendChild(frag);
 }
 
 function ensureTrackStructure(root){
-  let track = root.querySelector('.carousel-track');
-  if (!track) {
-    track = document.createElement('div'); track.className='carousel-track'; root.appendChild(track);
+  // kept for compatibility: ensure main-image and thumbs exist
+  if (!root.querySelector('.main-image')){
+    const main = document.createElement('div'); main.className='main-image'; root.insertBefore(main, root.firstChild);
   }
-  // Ajouter boutons/dots si absents
-  if (!root.querySelector('.carousel-btn.prev')) {
-    const prev = document.createElement('button'); prev.className='carousel-btn prev'; prev.type='button'; prev.setAttribute('aria-label','Précédent'); prev.textContent='‹'; root.appendChild(prev);
+  if (!root.querySelector('.thumbs')){
+    const thumbs = document.createElement('div'); thumbs.className='thumbs'; root.appendChild(thumbs);
   }
-  if (!root.querySelector('.carousel-btn.next')) {
-    const next = document.createElement('button'); next.className='carousel-btn next'; next.type='button'; next.setAttribute('aria-label','Suivant'); next.textContent='›'; root.appendChild(next);
-  }
-  if (!root.querySelector('.carousel-dots')) {
-    const dots = document.createElement('div'); dots.className='carousel-dots'; root.appendChild(dots);
-  }
-  return track;
+  return root.querySelector('.main-image');
 }
 
-function setupCarousel(root){
-  const track = root.querySelector('.carousel-track');
-  if (!track) return;
-  const slides = Array.from(track.children);
-  let index = 0;
-  let autoplayMs = parseInt(root.dataset.autoplay||'0',10) || 0;
-  let timer;
-
-  const prevBtn = root.querySelector('.carousel-btn.prev');
-  const nextBtn = root.querySelector('.carousel-btn.next');
-  const dotsWrap = root.querySelector('.carousel-dots');
-  if (dotsWrap) {
-    slides.forEach((_,i)=>{
-      const b = document.createElement('button');
-      b.type='button';
-      b.setAttribute('aria-label','Aller à la diapositive '+(i+1));
-      b.addEventListener('click', ()=>goTo(i));
-      dotsWrap.appendChild(b);
-    });
-  }
-
-  function update(){
-    track.style.transform = `translateX(-${index*100}%)`;
-    if (dotsWrap) {
-      dotsWrap.querySelectorAll('button').forEach((b,i)=>{
-        b.setAttribute('aria-current', i===index ? 'true':'false');
+function setupGallery(root){
+  if (!root) return;
+  ensureTrackStructure(root);
+  const main = root.querySelector('.main-image');
+  const thumbs = root.querySelector('.thumbs');
+  if (!thumbs) return;
+  // If thumbs are not yet populated (async), observe and initialize when available
+  const initialize = ()=>{
+    const items = Array.from(thumbs.children).filter(n=> n.classList && n.classList.contains('thumb'));
+    if (!items.length) return false;
+    // Ensure first item is marked
+    items.forEach((b,i)=> b.setAttribute('aria-current', i===0 ? 'true':'false'));
+    // build images array from thumb imgs
+    const images = items.map(b=> b.querySelector('img')?.src).filter(Boolean);
+    function show(i){
+      const src = images[i];
+      if(!src) return;
+      main.innerHTML = '';
+      // build a resilient main image that prefers local then raw, and retries on error
+      const im = document.createElement('img');
+      im.alt = `${root.dataset.gallery} ${i+1}`;
+      // images[] may contain URLs (string) or be derived from thumb dataset
+      const thumb = items[i]?.querySelector('img');
+      const localSrc = thumb?.dataset?.local || null;
+      const rawSrc = thumb?.dataset?.raw || src || null;
+      // try local first if available (fast on local server), otherwise raw
+      im.src = localSrc || rawSrc;
+      // if load fails on local, fall back to raw; if raw fails, try local once more
+      let attemptedLocal = !!localSrc;
+      let attemptedRaw = !!rawSrc && (!attemptedLocal || (attemptedLocal && im.src===localSrc));
+      im.addEventListener('error', ()=>{
+        if (attemptedLocal && !attemptedRaw && rawSrc) {
+          attemptedRaw = true; im.src = rawSrc; return;
+        }
+        if (!attemptedLocal && localSrc) { attemptedLocal = true; im.src = localSrc; return; }
+        // give up — leave broken image indicator
       });
+      // default: contain to avoid cropping non-16:9 images
+      im.style.objectFit = 'contain';
+      im.addEventListener('load', ()=>{
+        try{
+          const w = im.naturalWidth || 1;
+          const h = im.naturalHeight || 1;
+          const ratio = w / h;
+          const target = 16/9;
+          // if image ratio is within 6% of 16:9, use cover to fill
+          if (Math.abs(ratio - target) / target < 0.06) {
+            im.style.objectFit = 'cover';
+          } else {
+            im.style.objectFit = 'contain';
+          }
+        }catch(e){}
+      });
+      main.appendChild(im);
+      items.forEach((b,idx)=> b.setAttribute('aria-current', idx===i ? 'true':'false'));
     }
-  }
-  function goTo(i){
-    index = (i+slides.length)%slides.length;
-    update();
-    restartAutoplay();
-  }
-  function next(){ goTo(index+1); }
-  function prev(){ goTo(index-1); }
-
-  // Désactiver navigation si une seule slide
-  if (slides.length < 2) {
-    if (nextBtn) nextBtn.hidden = true;
-    if (prevBtn) prevBtn.hidden = true;
-    if (dotsWrap) dotsWrap.hidden = true;
-  }
-
-  if (nextBtn) nextBtn.addEventListener('click', e=>{ e.stopPropagation(); next(); });
-  if (prevBtn) prevBtn.addEventListener('click', e=>{ e.stopPropagation(); prev(); });
-
-  // Gestes tactiles / souris (drag)
-  let startX = 0, isDown=false, delta=0;
-  root.addEventListener('pointerdown', e=>{ 
-    // Ignorer si clic sur un contrôle interactif (bouton, dot)
-    if (e.target.closest('.carousel-btn') || e.target.closest('.carousel-dots')) return; 
-    isDown=true; startX=e.clientX; delta=0; 
-    try { root.setPointerCapture(e.pointerId); } catch(_) {}
-  });
-  root.addEventListener('pointermove', e=>{ if(!isDown) return; delta = e.clientX - startX; });
-  root.addEventListener('pointerup', e=>{
-    if(!isDown) return; isDown=false; if(Math.abs(delta)>50){ delta<0?next():prev(); }
-  });
-  root.addEventListener('pointerleave', ()=>{ isDown=false; });
-
-  // Keyboard
-  root.setAttribute('tabindex','0');
-  root.addEventListener('keydown', e=>{ if(e.key==='ArrowRight') next(); else if(e.key==='ArrowLeft') prev(); });
-
-  function startAutoplay(){
-    if(!autoplayMs) return; timer = setInterval(next, autoplayMs);
-  }
-  function stopAutoplay(){ if(timer) clearInterval(timer); }
-  function restartAutoplay(){ stopAutoplay(); startAutoplay(); }
-  root.addEventListener('mouseenter', stopAutoplay);
-  root.addEventListener('mouseleave', startAutoplay);
-
-  update();
-  startAutoplay();
-}
-
-// MINI DEMO INVENTAIRE (optionnelle) - activée si #demoForm existe
-function initInventoryDemo(){
-  const form = document.getElementById('demoForm');
-  if(!form) return; // page sans démo
-  const list = document.getElementById('demoList');
-  const inventory = []; let idCounter=0;
-  function render(){
-    list.innerHTML='';
-    inventory.forEach(item=>{
-      const li=document.createElement('li');
-      li.innerHTML = `<span>${item.name} × ${item.qty}</span>`;
-      const del=document.createElement('button'); del.type='button'; del.textContent='X'; del.addEventListener('click',()=>{ remove(item.id); });
-      li.appendChild(del); list.appendChild(li);
+    // attach clicks (clean duplicates)
+    items.forEach((b,idx)=>{
+      b.replaceWith(b.cloneNode(true)); // remove previous listeners safely
     });
-  }
-  function add(name, qty){ qty=Number(qty)||1; const existing=inventory.find(i=>i.name===name); if(existing) existing.qty+=qty; else inventory.push({id:++idCounter,name,qty}); render(); }
-  function remove(id){ const i=inventory.findIndex(x=>x.id===id); if(i!==-1){ inventory.splice(i,1); render(); } }
-  form.addEventListener('submit', e=>{ e.preventDefault(); const data=new FormData(form); const name=(data.get('name')||'').toString().trim(); const qty=data.get('qty'); if(!name) return; add(name, qty); form.reset(); form.elements.name.focus(); });
-  render();
+    const fresh = Array.from(thumbs.children).filter(n=> n.classList && n.classList.contains('thumb'));
+    const setActive = (index)=>{
+      fresh.forEach((el,i)=> el.setAttribute('aria-current', i===index ? 'true':'false'));
+    };
+    fresh.forEach((b,idx)=> b.addEventListener('click', ()=>{ show(idx); setActive(idx); try{ b.focus(); }catch(e){} }));
+    // initial show first
+    show(0);
+    // keyboard support
+    root.setAttribute('tabindex','0');
+    root.addEventListener('keydown', e=>{
+      const cur = fresh.findIndex(b=> b.getAttribute('aria-current')==='true');
+      if (e.key === 'ArrowRight') show(Math.min(images.length-1, cur+1));
+      else if (e.key === 'ArrowLeft') show(Math.max(0, cur-1));
+    });
+    return true;
+  };
+  if (initialize()) return;
+  // otherwise observe for mutations (thumbs added)
+  const mo = new MutationObserver((muts, obs)=>{
+    if (initialize()) obs.disconnect();
+  });
+  mo.observe(thumbs, {childList:true});
 }
+
+// mini demo removed — demo functionality disabled (no demo form loaded)
 
 // SOURCES: load .hpp / .cpp from packages_pages/files/<folder>/
 async function initSources(){
@@ -267,8 +351,8 @@ function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 function init(){
   applyTheme();
   initYear();
-  initCarousels();
-  initInventoryDemo();
+  initGalleries();
+  // initInventoryDemo removed
   initSources();
   const toggleThemeBtn = document.getElementById('toggleTheme');
   if (toggleThemeBtn) toggleThemeBtn.addEventListener('click', toggleTheme);
