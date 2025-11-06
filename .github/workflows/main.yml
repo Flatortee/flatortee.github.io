@@ -4,14 +4,40 @@ on:
    branches:
      - main
 jobs:
- build-docs:
+ build:
    runs-on: ubuntu-latest
+   outputs:
+     build-status: ${{ steps.report.outputs.status }}
    steps:
-     - name: Checkout repository
-       uses: actions/checkout@v2
-     - name: Doxygen Action
-       uses: mattnotmitt/doxygen-action@1.12.0
+     - uses: actions/checkout@v4
+     - name: Build
+       run: npm ci && npm run build
+     - name: Report build status
+       id: report
+       run: echo "status=success" >> $GITHUB_OUTPUT
+
+ build-docs:
+  needs: build
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Doxygen Action
+      uses: mattnotmitt/doxygen-action@1.12.0
+      with:
+          working-directory: '.'
+          doxyfile-path: './Doxyfile'
+          enable-latex: true
+
+ deploy:
+   needs: build
+   runs-on: ubuntu-latest
+   if: needs.build.outputs.build-status == 'success'
+   steps:
+     - uses: actions/checkout@v4
+     - name: Deploy to GitHub Pages
+       uses: peaceiris/actions-gh-pages@v4
        with:
-           working-directory: '.'
-           doxyfile-path: './Doxyfile'
-           enable-latex: true
+         github_token: ${{ secrets.GITHUB_TOKEN }}
+         publish_dir: ./dist
+
