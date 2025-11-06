@@ -10,7 +10,8 @@ jobs:
      - name: Checkout repository
        uses: actions/checkout@v2
      - name: Generate Doxygen Documentation
-       uses: mattnotmitt/doxygen-action@v1.12.0
+       uses: mattnotmitt/doxygen-action@v1.9.5
        with:
-         working-directory: '.'
-         doxyfile-path: './Doxyfile'
+           working-directory: 'submodule/'
+           doxyfile-path: 'docs/Doxygen'
+           enable-latex: true
