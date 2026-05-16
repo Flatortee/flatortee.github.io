@@ -1,0 +1,297 @@
+You are a senior creative full-stack engineer and WebGL/UI architect.
+
+Your mission is to rebuild my GitHub Pages site from scratch under:
+
+https://flatortee.github.io/
+
+IMPORTANT CONSTRAINT:
+This must be a FULLY STATIC website compatible with GitHub Pages.
+NO server, NO SSR backend, NO Node runtime required at deployment.
+
+Use:
+
+* Next.js ONLY in Static Export mode (next export)
+  OR alternatively static-first architecture inside Next.js App Router configured for export.
+
+FINAL OUTPUT MUST BE DEPLOYABLE AS STATIC FILES (HTML/CSS/JS).
+
+---
+
+## STACK (STRICT)
+
+Core:
+
+* Next.js (static export only)
+* React
+* TypeScript
+
+Styling:
+
+* Tailwind CSS
+* shadcn/ui
+
+Animation:
+
+* GSAP + ScrollTrigger
+* Framer Motion
+* Lenis (must be optimized, optional reduced motion fallback)
+
+3D / WebGL:
+
+* Three.js
+* React Three Fiber
+* Drei
+* React Postprocessing
+
+Docs:
+
+* Fumadocs (must be compatible with static export)
+
+---
+
+## CRITICAL PERFORMANCE RULE (VERY IMPORTANT)
+
+The website MUST be ultra-optimized for performance.
+
+Hard constraints:
+
+* NO unnecessary re-renders
+* NO heavy global 3D scenes
+* NO always-running WebGL loops on all pages
+* Lazy load ALL 3D scenes
+* Use dynamic imports for Three.js
+* Reduce shader complexity
+* Limit particles count dynamically based on device
+* Disable heavy effects on low-end devices
+* Respect prefers-reduced-motion
+* Avoid scroll jank at all costs
+
+Target:
+
+* Stable 60 FPS on mid-range devices
+* Fast initial load (<2s ideal)
+* Lighthouse performance 90+
+
+If something can hurt performance, it must be optional or lazy-loaded.
+
+---
+
+## DEPLOYMENT CONSTRAINT (GITHUB PAGES)
+
+The final build must:
+
+* export to static HTML using next export
+* work without Node server
+* be deployable to /docs or root of GitHub Pages repo
+* support basePath configuration if needed
+* not rely on API routes or server functions
+
+---
+
+## WEBSITE STRUCTURE
+
+Routes (static pages):
+
+/
+→ Home / Immersive landing
+
+/portfolio
+→ Project showcase
+
+/engine
+→ Engine presentation page
+
+/docs-engine
+→ Engine documentation
+
+/docs-csharp
+→ Personal C# documentation
+
+/docs-unity
+→ Unity documentation
+
+---
+
+## VISUAL DIRECTION
+
+Style:
+
+* Dark futuristic UI
+* Glassmorphism (light usage, not heavy blur abuse)
+* Neon accents (subtle, not overglow)
+* Cinematic typography
+* Minimal but premium layout
+* AAA game UI inspired
+* Vercel / Linear / Apple aesthetic
+
+Avoid:
+
+* excessive particles
+* over-animated chaos
+* unreadable glow effects
+* visual noise
+
+---
+
+## ANIMATION STRATEGY
+
+Use animations intelligently, not everywhere.
+
+Rules:
+
+* GSAP only for key cinematic sequences
+* ScrollTrigger only for main storytelling sections
+* Framer Motion only for UI transitions
+* No double animation stacking conflicts
+* Keep animations purposeful, not decorative spam
+
+Include:
+
+* Hero intro cinematic animation
+* Scroll-based section reveals
+* Smooth page transitions
+* Hover micro-interactions
+* Subtle parallax layers
+* Mouse reactive lighting (lightweight)
+
+---
+
+## 3D STRATEGY (IMPORTANT OPTIMIZATION RULE)
+
+Three.js must be treated as "hero-only or section-only feature".
+
+Rules:
+
+* ONLY ONE main 3D scene per page maximum
+* Lazy load with dynamic import
+* Dispose scenes on unmount
+* Limit geometry complexity
+* Limit particle count based on device
+* Use postprocessing only in hero section
+* No global WebGL context
+
+Features:
+
+* Interactive hero 3D scene
+* Floating abstract shapes
+* Subtle particles (not dense)
+* Light bloom effect (optional)
+
+---
+
+## DOCUMENTATION SYSTEM (FUMADOCS)
+
+Must include:
+
+* Sidebar navigation
+* Search
+* MDX support
+* Clean developer UI
+* Dark mode optimized
+* Fast navigation
+
+Docs sections:
+
+* Engine docs
+* C# docs
+* Unity docs
+
+Must feel like:
+
+* Vercel Docs
+* Unity Docs
+* Unreal Engine docs
+
+BUT optimized for static export.
+
+---
+
+## ARCHITECTURE REQUIREMENTS
+
+Must be production-grade:
+
+* modular components
+* reusable animation hooks
+* isolated 3D modules
+* shared UI system (shadcn)
+* performance utilities
+* lazy-loading system
+* theme system (dark-first)
+* clean folder structure
+
+---
+
+## HOME PAGE (CRITICAL)
+
+Must include:
+
+* cinematic hero (with optional 3D scene)
+* animated intro text
+* short identity presentation
+* tech stack showcase
+* featured projects
+* scroll storytelling sections
+* subtle background motion
+* CTA to portfolio + docs
+
+Must feel like:
+a AAA interactive landing experience
+
+---
+
+## PORTFOLIO
+
+* animated project cards
+* hover preview effects
+* filter system
+* smooth transitions
+* optional media preview
+
+---
+
+## ENGINE PRESENTATION
+
+Must feel like a real product page:
+
+* architecture explanation
+* features list
+* performance highlights
+* visual diagrams (static or light animated)
+* technical breakdown
+
+Inspired by:
+
+* Unreal Engine marketing pages
+* Unity showcase pages
+
+---
+
+## FINAL OUTPUT EXPECTED FROM AGENT
+
+1. Full project structure
+2. Next.js static export configuration
+3. GitHub Pages deployment guide
+4. Folder architecture
+5. Core layout system
+6. Animation system setup (optimized)
+7. Three.js architecture (lazy-loaded)
+8. Fumadocs setup (static compatible)
+9. Example pages for all routes
+10. Performance optimization system
+11. Responsive navigation system
+12. Theme system (dark futuristic)
+
+---
+
+## FINAL RULE
+
+This is NOT a dynamic web app.
+
+This is a STATIC, HIGH-PERFORMANCE, IMMERSIVE developer experience deployed on GitHub Pages.
+
+Everything must be engineered for:
+
+* speed
+* smoothness
+* maintainability
+* static hosting compatibility
