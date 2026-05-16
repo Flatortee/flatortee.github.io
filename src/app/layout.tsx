@@ -4,8 +4,6 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { LenisProvider } from '@/components/motion/LenisProvider';
-import { TopNav } from '@/components/layout/TopNav';
-import { Footer } from '@/components/layout/Footer';
 import { BackgroundFX } from '@/components/layout/BackgroundFX';
 import { SearchProvider } from '@/components/search/SearchProvider';
 
@@ -25,9 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <LenisProvider>
             <SearchProvider>
               <BackgroundFX />
-              <TopNav />
-              <main className="relative min-h-[calc(100vh-96px)]">{children}</main>
-              <Footer />
+              {children}
             </SearchProvider>
           </LenisProvider>
         </ThemeProvider>

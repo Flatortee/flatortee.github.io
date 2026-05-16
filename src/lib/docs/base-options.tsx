@@ -24,7 +24,7 @@ export function baseDocsOptions(title: string): BaseLayoutProps {
     ],
     githubUrl: 'https://github.com/Flatortee/flatortee.github.io',
     searchToggle: {
-      enabled: true,
+      enabled: false,
     },
   };
 }
