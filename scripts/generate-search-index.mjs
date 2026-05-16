@@ -3,7 +3,7 @@ import { loader } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { initSimpleSearch } from 'fumadocs-core/search/server';
 
-import { docsEngine, docsCsharp, docsUnity } from 'collections/server';
+import { docsEngine, docsCsharp, docsUnity } from '../collections/server.js';
 
 async function buildIndexes({ baseUrl, docs, keywords }) {
   const source = loader({
