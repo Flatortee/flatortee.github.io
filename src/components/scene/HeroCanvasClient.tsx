@@ -1,8 +1,8 @@
 'use client';
 
-import { Suspense, useMemo, useRef } from 'react';
+import { Suspense, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Environment, Float } from '@react-three/drei';
+import { Environment, Float, OrbitControls, Preload } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
@@ -79,11 +79,14 @@ function ParticleRing() {
 }
 
 export default function HeroCanvasClient() {
+  const [dpr, setDpr] = useState([1, 1.5]);
+
   return (
     <Canvas
       className="absolute inset-0"
-      dpr={[1, 2]}
+      dpr={dpr}
       camera={{ position: [0, 0.2, 5], fov: 50 }}
+      performance={{ min: 0.5, max: 1 }}
     >
       <color attach="background" args={[0x000000]} />
       <ambientLight intensity={0.4} />
@@ -93,6 +96,8 @@ export default function HeroCanvasClient() {
         <ParticleRing />
         <FloatingGlyph />
         <Environment preset="city" />
+        <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
+        <Preload all />
 
         <EffectComposer>
           <Bloom intensity={0.8} luminanceThreshold={0.3} luminanceSmoothing={0.8} />
