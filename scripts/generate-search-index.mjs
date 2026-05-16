@@ -1,38 +1,49 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { loader } from 'fumadocs-core/source';
-import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { initSimpleSearch } from 'fumadocs-core/search/server';
 
-import { docsEngine, docsCsharp, docsUnity } from '../collections/server.js';
+function scanDocsFolder(dir, baseUrl, keywords) {
+  const items = [];
 
-async function buildIndexes({ baseUrl, docs, keywords }) {
-  const source = loader({
-    baseUrl,
-    source: docs.toFumadocsSource(),
-    plugins: [lucideIconsPlugin()],
-  });
+  function walk(folderPath, urlPath) {
+    try {
+      const files = readdirSync(folderPath, { withFileTypes: true });
+      files.forEach((file) => {
+        if (file.isDirectory()) {
+          walk(join(folderPath, file.name), `${urlPath}/${file.name}`);
+        } else if (file.name.endsWith('.mdx') || file.name.endsWith('.md')) {
+          const filePath = join(folderPath, file.name);
+          const content = readFileSync(filePath, 'utf-8');
+          const slug = file.name.replace(/\.(mdx?|md)$/, '');
+          const url = `${baseUrl}/${slug === 'index' ? '' : slug}`.replace(/\/+/g, '/');
 
-  const pages = source.getPages();
+          // Extract title from frontmatter or filename
+          const titleMatch = content.match(/^---[\s\S]*?title:\s*['"]?([^'"\n]+)/m);
+          const title = titleMatch?.[1] || slug.replace(/-/g, ' ');
 
-  return Promise.all(
-    pages.map(async (page) => {
-      const content = await page.data.getText('processed');
+          items.push({
+            title,
+            description: '',
+            content: content.split('---').slice(2).join('---').trim(),
+            url,
+            keywords,
+          });
+        }
+      });
+    } catch (err) {
+      console.warn(`Warning: Could not read ${dir}`, err.message);
+    }
+  }
 
-      return {
-        title: page.data.title,
-        description: page.data.description ?? '',
-        content,
-        url: page.url,
-        keywords,
-      };
-    })
-  );
+  walk(dir, baseUrl);
+  return items;
 }
 
 const indexes = [
-  ...(await buildIndexes({ baseUrl: '/docs-engine', docs: docsEngine, keywords: 'engine' })),
-  ...(await buildIndexes({ baseUrl: '/docs-csharp', docs: docsCsharp, keywords: 'csharp' })),
-  ...(await buildIndexes({ baseUrl: '/docs-unity', docs: docsUnity, keywords: 'unity' })),
+  ...scanDocsFolder('content/docs-engine', '/docs-engine', 'engine'),
+  ...scanDocsFolder('content/docs-csharp', '/docs-csharp', 'csharp'),
+  ...scanDocsFolder('content/docs-unity', '/docs-unity', 'unity'),
 ];
 
 const search = initSimpleSearch({
