@@ -1,5 +1,5 @@
-import 'fumadocs-ui/style.css';
 import './globals.css';
+import 'fumadocs-ui/style.css';
 
 import type { Metadata } from 'next';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
