@@ -7,6 +7,10 @@ import { registerGsap, ScrollTrigger } from '@/lib/motion/gsap';
 
 export function LenisProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    if (reduced) return;
+
     registerGsap();
 
     const lenis = new Lenis({

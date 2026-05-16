@@ -16,9 +16,13 @@ export function Reveal({
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    registerGsap();
     const el = ref.current;
     if (!el) return;
+
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    if (reduced) return;
+
+    registerGsap();
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
