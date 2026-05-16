@@ -1,11 +1,13 @@
 import { Hero } from '@/components/sections/Hero';
 import { TechMarquee } from '@/components/sections/TechMarquee';
+import { ScrollStory } from '@/components/sections/ScrollStory';
 
 export default function HomePage() {
   return (
     <>
       <Hero />
       <TechMarquee />
+      <ScrollStory />
 
       <section className="relative mx-auto max-w-6xl px-6 py-20">
         <div className="grid gap-6 md:grid-cols-3">
