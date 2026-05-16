@@ -1,9 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { HeroCanvas } from '@/components/scene/HeroCanvas';
 import { Reveal } from '@/components/motion/Reveal';
 
 export function Hero() {
@@ -42,15 +41,16 @@ export function Hero() {
 
           <div className="relative">
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-primary/20 via-transparent to-cyan-400/20 blur-2xl" />
-            <div className="relative h-[360px] md:h-[420px] rounded-3xl border bg-card/30 backdrop-blur-xl overflow-hidden">
-              <HeroCanvas />
-              <div className="absolute inset-x-0 bottom-0 p-5">
-                <div className="rounded-2xl border bg-background/40 backdrop-blur-xl p-4">
-                  <div className="text-xs text-muted-foreground">Interactive R3F Hero</div>
-                  <div className="mt-1 text-sm">
-                    Postprocessing bloom • Float fields • Mouse-reactive motion
-                  </div>
-                </div>
+            <div className="relative h-[360px] md:h-[420px] rounded-3xl border bg-card/30 backdrop-blur-xl overflow-hidden flex items-center justify-center">
+              <div className="relative w-64 h-64">
+                <Image
+                  src="https://github.com/flatortee.png"
+                  alt="GitHub Profile"
+                  fill
+                  className="rounded-2xl object-cover"
+                  priority
+                  onError={() => console.log('Image failed to load, using placeholder')}
+                />
               </div>
             </div>
           </div>

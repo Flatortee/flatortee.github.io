@@ -1,3 +1,4 @@
+import './docs.css';
 import 'fumadocs-ui/style.css';
 
 export default function DocsGroupLayout({ children }: { children: React.ReactNode }) {
