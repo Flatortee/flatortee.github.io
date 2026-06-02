@@ -52,12 +52,15 @@ const FEATURES = [
 ]
 
 // Static animation objects
-const BADGE_ANIM = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6 } } as const
-const H1_ANIM = { initial: { opacity: 0, y: 30 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] as const } } as const
-const P_ANIM = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.7, delay: 0.3 } } as const
-const BTNS_ANIM = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, delay: 0.45 } } as const
-const SCROLL_ANIM = { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { delay: 1.2 } } as const
-const SCROLL_LINE_ANIM = { animate: { y: [0, 6, 0] }, transition: { duration: 1.5, repeat: Infinity } } as const
+// Note: arrays used as keyframes (e.g. [0, 6, 0]) must stay mutable — no `as const`
+const BADGE_ANIM = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6 } }
+const H1_ANIM = { initial: { opacity: 0, y: 30 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] as number[] } }
+const P_ANIM = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.7, delay: 0.3 } }
+const BTNS_ANIM = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, delay: 0.45 } }
+const SCROLL_ANIM = { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { delay: 1.2 } }
+// Keyframe array must be mutable — Framer Motion's TargetAndTransition requires it
+const SCROLL_LINE_ANIMATE = { y: [0, 6, 0] as number[] }
+const SCROLL_LINE_TRANSITION = { duration: 1.5, repeat: Infinity }
 
 const GRID_BG = {
   backgroundImage: `linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)`,
@@ -137,8 +140,8 @@ export default memo(function Home() {
         >
           <span className="text-xs text-muted font-mono tracking-widest">SCROLL</span>
           <motion.div
-            animate={SCROLL_LINE_ANIM.animate}
-            transition={SCROLL_LINE_ANIM.transition}
+            animate={SCROLL_LINE_ANIMATE}
+            transition={SCROLL_LINE_TRANSITION}
             className="w-[1px] h-8 bg-gradient-to-b from-accent to-transparent"
           />
         </motion.div>
