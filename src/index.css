@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -12,12 +14,31 @@
   html {
     background: #080808;
     color: #e8e8e8;
+    /* Subpixel font rendering */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Prevent font size adjustment on mobile */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Improve text rendering */
+    text-rendering: optimizeSpeed;
   }
 
   body {
     overflow-x: hidden;
+    /* Reduce paint complexity for scroll */
+    overscroll-behavior: none;
+  }
+
+  /* Reduce motion for accessibility — skip expensive animations */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   ::selection {
@@ -25,22 +46,15 @@
     color: #080808;
   }
 
-  ::-webkit-scrollbar {
-    width: 4px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #0f0f0f;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #2a2a2a;
-    border-radius: 2px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #444;
-  }
+  /* Custom scrollbar — thin for perf */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #0f0f0f; }
+  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #444; }
 }
 
 @layer utilities {
+  /* text-gradient: GPU-composited, no layout cost */
   .text-gradient {
     background: linear-gradient(135deg, #c8ff00 0%, #00ffcc 100%);
     -webkit-background-clip: text;
@@ -55,11 +69,14 @@
     background-clip: text;
   }
 
+  /* Glass: backdrop-filter is expensive — promote to compositor */
   .glass {
     background: rgba(15, 15, 15, 0.7);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.06);
+    /* Isolate the stacking context for compositor */
+    isolation: isolate;
   }
 
   .glass-light {
@@ -67,20 +84,30 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.06);
+    isolation: isolate;
   }
 
+  /* Noise overlay: fixed + z-index highest → its own compositor layer
+     Using contain:strict keeps repaints local */
   .noise {
     position: relative;
+    /* Establish containing block for fixed noise child */
+    transform: translateZ(0);
   }
+
   .noise::after {
     content: '';
     position: fixed;
     inset: 0;
+    /* Base64 SVG avoids extra network request */
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 9999;
     opacity: 0.35;
     mix-blend-mode: overlay;
+    /* Promote noise to own compositor layer — never repaints with page content */
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   .glow-accent {
@@ -96,19 +123,23 @@
   }
 }
 
-/* Lenis smooth scroll */
+/* Lenis smooth scroll — official integration */
 html.lenis {
   height: auto;
 }
+
 .lenis.lenis-smooth {
-  scroll-behavior: auto;
+  scroll-behavior: auto !important;
 }
+
 .lenis.lenis-smooth [data-lenis-prevent] {
   overscroll-behavior: contain;
 }
+
 .lenis.lenis-stopped {
   overflow: hidden;
 }
+
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
 }

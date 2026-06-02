@@ -1,26 +1,29 @@
 import { motion } from 'framer-motion'
-import { ReactNode } from 'react'
+import { ReactNode, memo } from 'react'
 
 interface PageTransitionProps {
   children: ReactNode
 }
 
-const variants = {
+// Static objects outside component — zero allocations on render
+const VARIANTS = {
   initial: { opacity: 0, y: 20 },
   enter: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -10 },
-}
+} as const
 
-export default function PageTransition({ children }: PageTransitionProps) {
+const TRANSITION = { duration: 0.4, ease: [0.16, 1, 0.3, 1] as const } as const
+
+export default memo(function PageTransition({ children }: PageTransitionProps) {
   return (
     <motion.div
-      variants={variants}
+      variants={VARIANTS}
       initial="initial"
       animate="enter"
       exit="exit"
-      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      transition={TRANSITION}
     >
       {children}
     </motion.div>
   )
-}
+})

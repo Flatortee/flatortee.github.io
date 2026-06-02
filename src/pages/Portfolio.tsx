@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { motion } from 'framer-motion'
 import { ExternalLink, Github } from 'lucide-react'
 import PageTransition from '../components/ui/PageTransition'
@@ -12,12 +13,12 @@ interface WorkItem {
   featured?: boolean
 }
 
-const works: WorkItem[] = [
+// Module-level constant — zero re-allocation
+const WORKS: WorkItem[] = [
   {
     title: 'Nanally Engine',
     category: 'Game Engine',
-    description:
-      'A fully custom real-time 3D rendering engine. Deferred shading pipeline, physically-based rendering, and a custom entity-component system.',
+    description: 'A fully custom real-time 3D rendering engine. Deferred shading pipeline, physically-based rendering, and a custom entity-component system.',
     tech: ['C++17', 'OpenGL 4.6', 'GLSL', 'CMake'],
     year: '2024',
     featured: true,
@@ -25,8 +26,7 @@ const works: WorkItem[] = [
   {
     title: 'Procedural Planet Generator',
     category: 'Tools / Simulation',
-    description:
-      'GPU-accelerated procedural planet generation with atmosphere scattering, erosion simulation, and real-time terrain LOD.',
+    description: 'GPU-accelerated procedural planet generation with atmosphere scattering, erosion simulation, and real-time terrain LOD.',
     tech: ['C#', 'Compute Shaders', 'Unity'],
     year: '2024',
     featured: true,
@@ -34,8 +34,7 @@ const works: WorkItem[] = [
   {
     title: 'Portfolio Website',
     category: 'Frontend',
-    description:
-      'This very site — a premium static portfolio built with Vite, React, TypeScript, Tailwind CSS, and Framer Motion.',
+    description: 'This very site — a premium static portfolio built with Vite, React, TypeScript, Tailwind CSS, and Framer Motion.',
     tech: ['React', 'TypeScript', 'Tailwind', 'Framer Motion'],
     year: '2024',
     featured: true,
@@ -43,33 +42,36 @@ const works: WorkItem[] = [
   {
     title: 'ECS Framework',
     category: 'Systems',
-    description:
-      'A minimal, high-performance Entity-Component-System framework in modern C++20 using archetypes and sparse sets.',
+    description: 'A minimal, high-performance Entity-Component-System framework in modern C++20 using archetypes and sparse sets.',
     tech: ['C++20', 'Templates', 'SIMD'],
     year: '2023',
   },
   {
     title: 'Shader Playground',
     category: 'Graphics',
-    description:
-      'Interactive WebGL shader editor with live preview, code sharing, and a library of hand-crafted GLSL effects.',
+    description: 'Interactive WebGL shader editor with live preview, code sharing, and a library of hand-crafted GLSL effects.',
     tech: ['WebGL', 'GLSL', 'React', 'TypeScript'],
     year: '2023',
   },
   {
     title: 'DevKit CLI',
     category: 'Tools',
-    description:
-      'A command-line toolkit for game developers — asset pipeline management, build automation, and project scaffolding.',
+    description: 'A command-line toolkit for game developers — asset pipeline management, build automation, and project scaffolding.',
     tech: ['Rust', 'CLI', 'TOML'],
     year: '2023',
   },
 ]
 
-export default function Portfolio() {
-  const featured = works.filter((w) => w.featured)
-  const rest = works.filter((w) => !w.featured)
+const FEATURED = WORKS.filter((w) => w.featured)
+const REST = WORKS.filter((w) => !w.featured)
 
+// Static viewport objects
+const VIEWPORT = { once: true } as const
+
+// Computed once at module load
+const GLOW_STYLE = { background: 'radial-gradient(circle, rgba(200,255,0,0.06) 0%, transparent 70%)' } as const
+
+export default memo(function Portfolio() {
   return (
     <PageTransition>
       <div className="max-w-5xl mx-auto px-6 pt-32 pb-24">
@@ -94,17 +96,19 @@ export default function Portfolio() {
           </SectionReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {featured.map((w, i) => (
+            {FEATURED.map((w, i) => (
               <motion.div
                 key={w.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={VIEWPORT}
                 transition={{ duration: 0.5, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
                 className="group bg-surface-2 border border-border hover:border-accent/20 rounded-2xl p-6 transition-all duration-300 relative overflow-hidden"
               >
-                <div className="absolute top-0 right-0 w-24 h-24 rounded-full pointer-events-none"
-                  style={{ background: 'radial-gradient(circle, rgba(200,255,0,0.06) 0%, transparent 70%)' }}
+                <div
+                  aria-hidden="true"
+                  className="absolute top-0 right-0 w-24 h-24 rounded-full pointer-events-none"
+                  style={GLOW_STYLE}
                 />
                 <span className="inline-block text-xs text-accent font-mono bg-accent/10 px-3 py-1 rounded-full mb-4">
                   {w.category}
@@ -121,11 +125,11 @@ export default function Portfolio() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-muted font-mono">{w.year}</span>
                   <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="p-1.5 glass-light rounded-lg text-muted hover:text-white transition-colors" aria-label="GitHub">
-                      <Github size={14} />
+                    <button className="p-1.5 glass-light rounded-lg text-muted hover:text-white transition-colors" aria-label={`${w.title} on GitHub`}>
+                      <Github size={14} aria-hidden="true" />
                     </button>
-                    <button className="p-1.5 glass-light rounded-lg text-muted hover:text-white transition-colors" aria-label="External link">
-                      <ExternalLink size={14} />
+                    <button className="p-1.5 glass-light rounded-lg text-muted hover:text-white transition-colors" aria-label={`Open ${w.title}`}>
+                      <ExternalLink size={14} aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -141,12 +145,12 @@ export default function Portfolio() {
           </SectionReveal>
 
           <div className="space-y-3">
-            {rest.map((w, i) => (
+            {REST.map((w, i) => (
               <motion.div
                 key={w.title}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
+                viewport={VIEWPORT}
                 transition={{ duration: 0.4, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
                 className="group flex flex-col sm:flex-row sm:items-center gap-4 bg-surface-2 border border-border hover:border-border-2 rounded-xl px-5 py-4 transition-all duration-200"
               >
@@ -174,4 +178,4 @@ export default function Portfolio() {
       </div>
     </PageTransition>
   )
-}
+})
