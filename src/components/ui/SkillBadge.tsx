@@ -10,7 +10,7 @@ interface SkillBadgeProps {
 // Static objects — prevent allocation on every parent re-render
 const HOVER = { scale: 1.04, borderColor: 'rgba(200,255,0,0.3)' } as const
 const VIEWPORT = { once: true } as const
-const TRANSITION = { duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] as const } as const
+const TRANSITION = { duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] as number[] } as const
 
 export default memo(function SkillBadge({ name, level = 90, icon }: SkillBadgeProps) {
   return (

@@ -12,7 +12,7 @@ const VARIANTS = {
   exit: { opacity: 0, y: -10 },
 } as const
 
-const TRANSITION = { duration: 0.4, ease: [0.16, 1, 0.3, 1] as const } as const
+const TRANSITION = { duration: 0.4, ease: [0.16, 1, 0.3, 1] as number[] } as const
 
 export default memo(function PageTransition({ children }: PageTransitionProps) {
   return (

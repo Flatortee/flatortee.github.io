@@ -14,7 +14,7 @@ const LINKS = [
 // Static animation objects — defined outside to prevent recreation
 const NAV_INITIAL = { y: -80, opacity: 0 } as const
 const NAV_ANIMATE = { y: 0, opacity: 1 } as const
-const NAV_TRANSITION = { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const } as const
+const NAV_TRANSITION = { duration: 0.7, ease: [0.16, 1, 0.3, 1] as number[] } as const
 
 const MOBILE_INITIAL = { opacity: 0, y: -20 } as const
 const MOBILE_ANIMATE = { opacity: 1, y: 0 } as const
