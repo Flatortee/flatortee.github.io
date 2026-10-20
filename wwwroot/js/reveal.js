@@ -1,4 +1,3 @@
-// IntersectionObserver partagé : seules les classes CSS changent, les transitions tournent sur le GPU.
 const once = new WeakMap();
 let io = null;
 

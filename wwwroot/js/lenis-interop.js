@@ -1,6 +1,3 @@
-// Module ES appelé par LenisService.cs. Lenis est chargé par le CDN (index.html, defer).
-// Optimisation : la boucle requestAnimationFrame S'ENDORT quand la page ne défile pas
-// et se réveille sur wheel / scroll / touch / clavier => 0 % CPU à l'arrêt.
 let lenis = null;
 let rafId = 0;
 let idle = 0;
