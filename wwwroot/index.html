@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Portfolio</title>
+
+    <!--
+      GitHub Pages :
+        - Site utilisateur (username.github.io)    -> <base href="/" />
+        - Site de projet (username.github.io/repo) -> <base href="/repo/" />
+      Le workflow GitHub Actions réécrit automatiquement cette balise.
+    -->
+    <base href="/"/>
+
+    <meta content="Portfolio développeur .NET & Blazor" name="description"/>
+    <meta content="#090a0f" name="theme-color"/>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link crossorigin href="https://cdn.jsdelivr.net" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" media="print"
+          onload="this.media='all'" rel="stylesheet"/>
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    </noscript>
+
+    <link href="favicon.svg" rel="icon" type="image/svg+xml"/>
+    <link href="css/app.css" rel="stylesheet"/>
+
+    <script>
+        document.documentElement.classList.add('reveal-ready');
+        // Reveal : un seul IntersectionObserver ; les .reveal ajoutés par Blazor sont détectés automatiquement.
+        (() => {
+            const io = new IntersectionObserver(entries => {
+                for (const {target: el, isIntersecting} of entries) {
+                    if (isIntersecting) {
+                        el.classList.add('is-visible');
+                        if (el.dataset.once !== 'false') io.unobserve(el);
+                    } else if (el.dataset.once === 'false') {
+                        el.classList.remove('is-visible');
+                    }
+                }
+            }, {threshold: 0.12, rootMargin: '0px 0px -8% 0px'});
+
+            const watch = (node, fn) => {
+                if (node.nodeType !== 1) return;
+                if (node.classList.contains('reveal')) fn(node);
+                if (node.firstElementChild) node.querySelectorAll('.reveal').forEach(fn);
+            };
+            const add = el => {
+                if (!el.classList.contains('is-visible')) io.observe(el);
+            };
+            const del = el => io.unobserve(el);
+
+            new MutationObserver(records => {
+                for (const r of records) {
+                    r.addedNodes.forEach(n => watch(n, add));
+                    r.removedNodes.forEach(n => watch(n, del));
+                }
+            }).observe(document.documentElement, {childList: true, subtree: true});
+        })();
+    </script>
+    <script type="importmap"></script>
+</head>
+
+<body>
+<div id="app">
+    <div aria-label="Chargement" class="boot-loader"><span></span></div>
+</div>
+
+<noscript>
+    <style>.reveal-ready .reveal {
+        opacity: 1 !important;
+        transform: none !important;
+    }</style>
+</noscript>
+
+<!-- Lenis (smooth scroll) via CDN : expose le global `Lenis` -->
+<script defer src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+
+<script src="_framework/blazor.webassembly.js"></script>
+</body>
+
+</html>

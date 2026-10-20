@@ -1,0 +1,48 @@
+@page "/projects"
+
+<PageTitle>Projets — @Site.Name</PageTitle>
+
+<Reveal>
+    <SectionHeading Eyebrow="Portfolio" Title="Tous les projets" Subtitle="Filtrez par type de réalisation."/>
+</Reveal>
+
+<Reveal Delay="80" Class="mb-8 flex flex-wrap gap-2">
+    <button type="button" class="@FilterClass(null)" @onclick="ShowAll">Tous</button>
+    @foreach (ProjectKind kind in ProjectCatalog.Kinds) {
+        ProjectKind k = kind;
+        <button type="button" class="@FilterClass(k)" @onclick="() => Select(k)">@k</button>
+    }
+</Reveal>
+
+<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    @foreach (Project project in _visible) {
+        <ProjectCard @key="project.Title" Project="project"/>
+    }
+</div>
+
+@code {
+    private ProjectKind? _filter;
+    private IReadOnlyList<Project> _visible = ProjectCatalog.Filter(null);
+
+    private void ShowAll() {
+        Apply(null);
+    }
+
+    private void Select(ProjectKind kind) {
+        Apply(kind);
+    }
+
+    private void Apply(ProjectKind? kind) {
+        if (_filter == kind) return;
+        _filter = kind;
+        _visible = ProjectCatalog.Filter(kind);
+    }
+
+    private string FilterClass(ProjectKind? kind) {
+        return (kind, _filter) switch {
+            (null, null) => "chip chip-active",
+            ({ } a, { } b) when a == b => "chip chip-active",
+            _ => "chip"
+        };
+    }
+}

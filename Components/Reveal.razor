@@ -1,0 +1,39 @@
+<div class="reveal @Class"
+     data-dir="@_direction"
+     data-once="@(Once ? null : "false")"
+     style="--reveal-delay:@(Delay)ms"
+     @attributes="Attributes">
+    @ChildContent
+</div>
+
+@code {
+    private string _direction = "up";
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    [Parameter]
+    public RevealDirection Direction {
+        get;
+        set {
+            field = value;
+            _direction = value.ToAttribute();
+        }
+    } = RevealDirection.Up;
+
+    [Parameter]
+    public int Delay {
+        get;
+        set => field = Math.Clamp(value, 0, 2000);
+    }
+
+    [Parameter]
+    public bool Once { get; set; } = true;
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? Attributes { get; set; }
+
+}

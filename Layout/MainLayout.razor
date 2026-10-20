@@ -1,0 +1,101 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject LenisService Lenis
+@inject NavigationManager Navigation
+
+<div class="aurora" aria-hidden="true"></div>
+
+<header class="fixed inset-x-0 top-0 z-50 px-4">
+    <nav
+        class="glass backdrop-blur-md mx-auto mt-4 flex max-w-5xl items-center justify-between rounded-full px-5 py-2.5">
+        <NavLink href="" class="flex items-center gap-2 font-semibold tracking-tight text-white">
+            <span
+                class="inline-block h-2.5 w-2.5 rounded-full bg-gradient-to-br from-violet-400 to-cyan-300 shadow-[0_0_14px_#7c5cff]"></span>
+            @Site.Name
+        </NavLink>
+
+        <div class="hidden items-center gap-1 md:flex">
+            <NavLink href="" Match="NavLinkMatch.All" class="nav-link">Accueil</NavLink>
+            <NavLink href="projects" class="nav-link">Projets</NavLink>
+            <NavLink href="about" class="nav-link">À propos</NavLink>
+            <a href="mailto:@Site.Email"
+               class="ml-2 rounded-full bg-white px-4 py-1.5 text-sm font-medium text-black transition hover:bg-zinc-200">Me
+                contacter</a>
+        </div>
+
+        <button type="button" class="text-zinc-300 md:hidden" aria-label="Menu" aria-expanded="@_menuOpen"
+                @onclick="ToggleMenu">
+            @if (_menuOpen) {
+                <XIcon Size="22"/>
+            }
+            else {
+                <MenuIcon Size="22"/>
+            }
+        </button>
+    </nav>
+
+    @if (_menuOpen) {
+        <div class="glass mx-auto mt-2 flex max-w-5xl flex-col gap-1 rounded-2xl p-3 md:hidden" @onclick="CloseMenu">
+            <NavLink href="" Match="NavLinkMatch.All" class="nav-link">Accueil</NavLink>
+            <NavLink href="projects" class="nav-link">Projets</NavLink>
+            <NavLink href="about" class="nav-link">À propos</NavLink>
+        </div>
+    }
+</header>
+
+<main class="mx-auto max-w-5xl px-6 pb-24 pt-32">
+    @Body
+</main>
+
+<footer class="border-t border-white/5 py-8 text-center text-sm text-zinc-500">
+    © @_year @Site.Name · Construit avec Blazor WebAssembly &amp; Tailwind CSS
+</footer>
+
+<div id="blazor-error-ui" data-nosnippet>
+    Une erreur est survenue.
+    <a href="." class="reload">Recharger</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    private static readonly int _year = DateTime.UtcNow.Year;
+    private bool _menuOpen;
+
+    protected override void OnInitialized() {
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if (firstRender)
+            await Lenis.InitAsync();
+    }
+
+    private void ToggleMenu() {
+        _menuOpen = !_menuOpen;
+    }
+
+    private void CloseMenu() {
+        _menuOpen = false;
+    }
+
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e) {
+        try {
+            if (_menuOpen) {
+                _menuOpen = false;
+                await InvokeAsync(StateHasChanged);
+            }
+
+            if (new Uri(e.Location).Fragment is { Length: > 1 } hash)
+                await Lenis.ScrollToAsync(hash, -90);
+            else
+                await Lenis.ScrollToTopAsync();
+        }
+        catch (JSException) {
+        }
+    }
+
+    public void Dispose() {
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+
+}

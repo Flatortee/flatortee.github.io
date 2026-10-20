@@ -1,0 +1,206 @@
+@import "tailwindcss";
+
+@source "../**/*.{razor,cs,html}";
+
+@theme {
+    --color-bg: #090a0f;
+    --color-accent: #7c5cff;
+    --color-accent-2: #22d3ee;
+    --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@layer base {
+    html {
+        background: #090a0f;
+        color-scheme: dark;
+    }
+
+    body {
+        @apply bg-bg font-sans text-zinc-200 antialiased;
+        min-height: 100dvh;
+    }
+
+    ::selection {
+        background: rgb(124 92 255 / .4);
+        color: #fff;
+    }
+}
+
+/* ---------- Lenis ---------- */
+html.lenis, html.lenis body {
+    height: auto;
+}
+
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+    overflow: hidden;
+}
+
+/* ---------- Fond aurora : dégradés statiques ---------- */
+.aurora {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    contain: strict;
+    background: radial-gradient(60vmax 60vmax at 0% 0%, rgb(124 92 255 / .22), transparent 70%),
+    radial-gradient(60vmax 60vmax at 100% 100%, rgb(34 211 238 / .14), transparent 70%);
+}
+
+/* ---------- Composants ---------- */
+@layer components {
+    .glass {
+        background: linear-gradient(180deg, rgb(255 255 255 / .055), rgb(255 255 255 / .025));
+        border: 1px solid rgb(255 255 255 / .08);
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / .05), 0 10px 40px -20px rgb(0 0 0 / .8);
+    }
+
+    .text-gradient {
+        background: linear-gradient(90deg, #a78bfa, #22d3ee 60%, #a78bfa);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .nav-link {
+        @apply rounded-full px-3.5 py-1.5 text-sm text-zinc-400 transition-colors hover:text-white;
+    }
+
+    .nav-link.active {
+        @apply bg-white/10 text-white;
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black transition duration-300 hover:-translate-y-0.5;
+    }
+
+    .btn-primary:hover {
+        box-shadow: 0 8px 30px -8px rgb(124 92 255 / .7);
+    }
+
+    .btn-ghost {
+        @apply inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-2.5 text-sm text-zinc-200 transition duration-300 hover:-translate-y-0.5 hover:bg-white/5;
+    }
+
+    .chip {
+        @apply rounded-full border border-white/10 px-4 py-1.5 text-sm text-zinc-400 transition hover:text-white;
+    }
+
+    .chip-active {
+        @apply border-white/20 bg-white/10 text-white;
+    }
+
+    .project-card {
+        contain: layout paint;
+        transition: transform .5s cubic-bezier(.16, 1, .3, 1), border-color .3s;
+    }
+
+    .project-card:hover {
+        transform: translate3d(0, -6px, 0);
+        border-color: rgb(255 255 255 / .18);
+    }
+
+    .link-arrow {
+        @apply inline-flex items-center gap-1 text-zinc-300 transition-colors hover:text-white;
+    }
+
+    .link-arrow .arrow {
+        transition: transform .3s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .link-arrow:hover .arrow {
+        transform: translate3d(2px, -2px, 0);
+    }
+}
+
+/* ---------- Reveal ---------- */
+.reveal-ready .reveal {
+    opacity: 0;
+    transform: translate3d(var(--rx, 0), var(--ry, 24px), 0) scale(var(--rs, 1));
+    transition: opacity .9s cubic-bezier(.16, 1, .3, 1) var(--reveal-delay, 0ms), /* ERROR UNK ici mais qui marche... bref*/
+    transform .9s cubic-bezier(.16, 1, .3, 1) var(--reveal-delay, 0ms);
+}
+
+.reveal[data-dir="down"] {
+    --ry: -24px;
+}
+
+.reveal[data-dir="left"] {
+    --ry: 0px;
+    --rx: -32px;
+}
+
+.reveal[data-dir="right"] {
+    --ry: 0px;
+    --rx: 32px;
+}
+
+.reveal[data-dir="scale"] {
+    --ry: 0px;
+    --rs: .96;
+}
+
+.reveal-ready .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal-ready .reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+}
+
+/* ---------- Blazor ---------- */
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 1000;
+    background: #3b1219;
+    color: #fecaca;
+    padding: .75rem 1.25rem;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: .75rem;
+    top: .5rem;
+}
+
+#blazor-error-ui .reload {
+    color: #fff;
+    text-decoration: underline;
+    margin-left: .5rem;
+}
+
+.boot-loader {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: #090a0f;
+}
+
+.boot-loader span {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid rgb(255 255 255 / .1);
+    border-top-color: #7c5cff;
+    animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

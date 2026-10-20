@@ -1,0 +1,73 @@
+@page "/"
+
+<PageTitle>@Site.Name — @Site.Role</PageTitle>
+
+<section class="flex min-h-[70vh] flex-col justify-center">
+    <Reveal>
+        <span class="glass inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs text-zinc-300">
+            <SparklesIcon Size="14" ClassName="text-violet-300"/>
+            Unreal ? c'est quoi ?
+        </span>
+    </Reveal>
+
+    <Reveal Delay="100">
+        <h1 class="mt-6 text-5xl font-semibold leading-[1.05] tracking-tight text-white sm:text-7xl">
+            @Site.Role<br/>
+            <span class="text-gradient">sans vie.</span>
+        </h1>
+    </Reveal>
+
+    <Reveal Delay="200">
+        <p class="mt-6 max-w-xl text-lg text-zinc-400">@Site.Tagline</p>
+    </Reveal>
+
+    <Reveal Delay="300" Class="mt-10 flex flex-wrap gap-3">
+        <NavLink href="projects" class="btn-primary">
+            Voir mes projets
+            <ArrowRightIcon Size="16"/>
+        </NavLink>
+        <a href="@Site.GitHub" target="_blank" rel="noopener" class="btn-ghost">
+            <CodeXmlIcon Size="16"/>
+            GitHub
+        </a>
+    </Reveal>
+</section>
+
+<section class="py-16">
+    <Reveal>
+        <SectionHeading Eyebrow="Sélection" Title="Projets à la une" Subtitle="Quelques réalisations récentes."/>
+    </Reveal>
+
+    <div class="grid gap-5 md:grid-cols-3">
+        @for (int i = 0; i < ProjectCatalog.Featured.Count; i++) {
+            Project project = ProjectCatalog.Featured[i];
+            int delay = i * 120;
+            <Reveal Delay="delay" Class="h-full">
+                <ProjectCard Project="project"/>
+            </Reveal>
+        }
+    </div>
+</section>
+
+<section class="py-16">
+    <Reveal>
+        <SectionHeading Eyebrow="Stack" Title="Outils du quotidien"/>
+    </Reveal>
+    <Reveal Delay="100" Direction="RevealDirection.Scale" Class="flex flex-wrap gap-3">
+        @foreach (string skill in Site.Skills) {
+            <span class="glass rounded-full px-4 py-2 text-sm text-zinc-200">@skill</span>
+        }
+    </Reveal>
+</section>
+
+<section id="contact" class="py-16">
+    <Reveal Direction="RevealDirection.Scale">
+        <div class="glass rounded-3xl p-10 text-center">
+            <h2 class="text-3xl font-semibold tracking-tight text-white">HUH</h2>
+            <p class="mx-auto mt-3 max-w-md text-zinc-400">Parlons-en : je réponds généralement sous 1 ans (et demi).</p>
+            <a href="mailto:@Site.Email" class="btn-primary mt-8">
+                <MailIcon Size="16"/> @Site.Email
+            </a>
+        </div>
+    </Reveal>
+</section>

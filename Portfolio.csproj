@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <LangVersion>14.0</LangVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>Portfolio</RootNamespace>
+
+        <!-- Taille / démarrage -->
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <CompressionEnabled>false</CompressionEnabled>
+        <BlazorEnableCompression>false</BlazorEnableCompression>
+    </PropertyGroup>
+
+    <!-- Release : trimming agressif, aucune fonctionnalité de debug embarquée -->
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <Optimize>true</Optimize>
+        <DebugType>none</DebugType>
+        <PublishTrimmed>true</PublishTrimmed>
+        <TrimMode>full</TrimMode>
+        <UseSystemResourceKeys>true</UseSystemResourceKeys>
+        <DebuggerSupport>false</DebuggerSupport>
+        <EventSourceSupport>false</EventSourceSupport>
+        <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+        <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+        <!-- AOT (plus rapide à l'exécution, build plus long) :
+             dotnet workload install wasm-tools  puis  -p:RunAOTCompilation=true -->
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.*"/>
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.*" PrivateAssets="all"/>
+        <PackageReference Include="LucideBlazor" Version="1.0.4"/>
+    </ItemGroup>
+
+    <!-- Tailwind CSS v4 : Styles/app.css -> wwwroot/css/app.css (Node.js 20+).
+         Désactivable : dotnet build -p:SkipTailwind=true -->
+    <Target Name="TailwindBuild" BeforeTargets="BeforeBuild" Condition="'$(SkipTailwind)' != 'true'">
+        <Exec Command="npm install --no-audit --no-fund --loglevel=error" Condition="!Exists('$(MSBuildProjectDirectory)/node_modules/@tailwindcss')" WorkingDirectory="$(MSBuildProjectDirectory)" StandardOutputImportance="low"/>
+        <Exec Command="npx @tailwindcss/cli -i Styles/app.css -o wwwroot/css/app.css --minify" WorkingDirectory="$(MSBuildProjectDirectory)" StandardOutputImportance="low" StandardErrorImportance="low"/>
+    </Target>
+
+</Project>

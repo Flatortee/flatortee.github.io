@@ -1,0 +1,54 @@
+<article class="project-card glass group relative flex h-full flex-col overflow-hidden rounded-2xl p-6">
+    <div
+        class="pointer-events-none absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-500 group-hover:opacity-100 @Project.GradientClass"></div>
+
+    <div class="relative flex items-start justify-between">
+        <div
+            class="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-lg font-semibold @Project.TextAccentClass">
+            @Project.Monogram
+        </div>
+        <span class="rounded-full border border-white/10 px-2.5 py-1 text-xs text-zinc-400">
+            @Project.KindLabel · @Project.Year
+        </span>
+    </div>
+
+    <h3 class="relative mt-5 text-lg font-semibold tracking-tight text-white">@Project.Title</h3>
+    <p class="relative mt-2 flex-1 text-sm leading-relaxed text-zinc-400">@Project.Description</p>
+
+    <ul class="relative mt-5 flex flex-wrap gap-2">
+        @foreach (string tag in Project.Tags) {
+            <li class="rounded-md bg-white/5 px-2 py-1 text-xs text-zinc-300">@tag</li>
+        }
+    </ul>
+
+    @if (Project is { RepoUrl: not null } or { LiveUrl: not null }) {
+        <div class="relative mt-5 flex gap-4 border-t border-white/5 pt-4 text-sm">
+            @if (Project.RepoUrl is { } repo) {
+                <a href="@repo" target="_blank" rel="noopener" class="link-arrow">
+                    Code
+                    <ArrowUpRightIcon Size="14" ClassName="arrow"/>
+                </a>
+            }
+            @if (Project.LiveUrl is { } live) {
+                <a href="@live" target="_blank" rel="noopener" class="link-arrow">
+                    Démo
+                    <ExternalLinkIcon Size="14" ClassName="arrow"/>
+                </a>
+            }
+        </div>
+    }
+</article>
+
+@code {
+    private Project? _rendered;
+
+    [Parameter][EditorRequired]
+    public required Project Project { get; set; }
+
+    protected override bool ShouldRender() {
+        if (ReferenceEquals(_rendered, Project)) return false;
+        _rendered = Project;
+        return true;
+    }
+
+}
